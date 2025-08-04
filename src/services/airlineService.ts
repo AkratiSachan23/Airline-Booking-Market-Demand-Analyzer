@@ -1,75 +1,16 @@
 import { FlightData, MarketInsight, RoutePopularity, PriceTrend } from '../types/airline';
+import { APIClient } from './apiClient';
 
-// Mock airline data service (in production, this would connect to real APIs)
+// Enhanced airline data service with real API integration
 export class AirlineService {
-  private static generateMockData(): FlightData[] {
-    const cities = ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Darwin', 'Hobart'];
-    const airlines = ['Qantas', 'Virgin Australia', 'Jetstar', 'Rex Airlines', 'Tigerair'];
-    const data: FlightData[] = [];
-
-    for (let i = 0; i < 200; i++) {
-      const origin = cities[Math.floor(Math.random() * cities.length)];
-      let destination = cities[Math.floor(Math.random() * cities.length)];
-      while (destination === origin) {
-        destination = cities[Math.floor(Math.random() * cities.length)];
-      }
-
-      const basePrice = 200 + Math.random() * 800;
-      const demandMultiplier = 0.5 + Math.random() * 1.5;
-      
-      data.push({
-        id: `flight-${i}`,
-        origin,
-        destination,
-        price: Math.round(basePrice * demandMultiplier),
-        date: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-        airline: airlines[Math.floor(Math.random() * airlines.length)],
-        demand: Math.round(demandMultiplier * 100),
-        bookings: Math.round(Math.random() * 500 + 50)
-      });
-    }
-
-    return data;
-  }
-
   static async fetchFlightData(): Promise<FlightData[]> {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return this.generateMockData();
+    console.log('Fetching flight data from APIs...');
+    return await APIClient.fetchFlightData();
   }
 
   static async generateInsights(data: FlightData[]): Promise<MarketInsight[]> {
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const insights: MarketInsight[] = [
-      {
-        category: 'Peak Demand',
-        insight: 'Sydney-Melbourne route shows 35% higher demand during weekends',
-        impact: 'high',
-        trend: 'up'
-      },
-      {
-        category: 'Pricing Trends',
-        insight: 'Average ticket prices increased 12% compared to last month',
-        impact: 'medium',
-        trend: 'up'
-      },
-      {
-        category: 'Popular Routes',
-        insight: 'Interstate routes dominate 68% of all bookings',
-        impact: 'high',
-        trend: 'stable'
-      },
-      {
-        category: 'Seasonal Patterns',
-        insight: 'Tourism destinations see 40% booking spike approaching holidays',
-        impact: 'medium',
-        trend: 'up'
-      }
-    ];
-
-    return insights;
+    console.log('Generating AI-powered insights...');
+    return await APIClient.generateInsights(data);
   }
 
   static getPopularRoutes(data: FlightData[]): RoutePopularity[] {
@@ -99,15 +40,20 @@ export class AirlineService {
   }
 
   static getPriceTrends(data: FlightData[]): PriceTrend[] {
-    const trends = data
-      .slice(0, 30)
+    // Combine real flight data with market trends
+    const flightTrends = data
+      .slice(0, 15)
       .map(flight => ({
         date: flight.date.split('T')[0],
         price: flight.price,
         route: `${flight.origin}-${flight.destination}`
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      }));
 
-    return trends;
+    return flightTrends.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+
+  static async getMarketTrends(): Promise<PriceTrend[]> {
+    console.log('Fetching market trend data...');
+    return await APIClient.fetchMarketTrends();
   }
 }

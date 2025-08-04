@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plane, Users, DollarSign, BarChart3, Brain } from 'lucide-react';
+import { Plane, Users, DollarSign, BarChart3, Brain, Settings } from 'lucide-react';
 import { Header } from './components/Header';
 import { MetricCard } from './components/MetricCard';
 import { InsightCard } from './components/InsightCard';
 import { PopularRoutesChart, PriceTrendsChart } from './components/ChartContainer';
 import { FilterPanel } from './components/FilterPanel';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { ApiStatus } from './components/ApiStatus';
 import { AirlineService } from './services/airlineService';
 import { FlightData, MarketInsight, RoutePopularity, PriceTrend } from './types/airline';
 
@@ -16,6 +17,7 @@ function App() {
   const [priceTrends, setPriceTrends] = useState<PriceTrend[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showApiStatus, setShowApiStatus] = useState(false);
 
   const loadData = async (showRefreshing = false) => {
     if (showRefreshing) {
@@ -28,7 +30,7 @@ function App() {
       const data = await AirlineService.fetchFlightData();
       const marketInsights = await AirlineService.generateInsights(data);
       const routes = AirlineService.getPopularRoutes(data);
-      const trends = AirlineService.getPriceTrends(data);
+      const trends = await AirlineService.getMarketTrends();
 
       setFlightData(data);
       setInsights(marketInsights);
@@ -74,6 +76,23 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <FilterPanel onRefresh={handleRefresh} isLoading={isRefreshing} />
 
+        {/* API Status Toggle */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setShowApiStatus(!showApiStatus)}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            API Status
+          </button>
+        </div>
+
+        {showApiStatus && (
+          <div className="mb-8">
+            <ApiStatus />
+          </div>
+        )}
+
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <MetricCard
@@ -116,8 +135,9 @@ function App() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-6">
             <Brain className="w-6 h-6 text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">AI Market Insights</h2>
+            <h2 className="text-2xl font-bold text-gray-900">AI-Powered Market Insights</h2>
             {isRefreshing && <LoadingSpinner size="sm" />}
+            <span className="text-sm text-gray-500 ml-2">(Powered by OpenAI)</span>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
